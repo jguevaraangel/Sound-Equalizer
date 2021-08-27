@@ -109,29 +109,13 @@ grid on
 
 %% Ecualizador  
 
-% Union de las ventanas
-height = abs(Fxs);
-modified = zeros(1,n);
-for j=1:12
-    temp = height'.*windows(j,:);
-    modified = modified + temp;
-end
-
-figure
-plot(f,modified);
-xlabel('Frecuencia [Hz]')
-ylabel('Amplitud [u.a.]')
-grid on
-
-% Verificamos que coincida con el vector de amplitud
-isequal(modified, height')
-
 % Hagamos la reconstrucción
-rebuild = zeros(1,n);
+rebuild = zeros(n,1);
 for j=1:12
-    temp = Fxs'.*windows(j,:);
+    temp = Fxs.*windows(j,:)';
     rebuild = rebuild + temp;
 end
+isequal(rebuild, Fxs)
 
 %% Obteniendo la Transformada inversa de Fourier
 
@@ -152,3 +136,4 @@ grid on
 xlabel('tiempo [s]')
 ylabel('Amplitud [u.a.]')
 title('Señal de sonido recuperada')
+sound(y,fs) % escuchamos la reconstruccion
