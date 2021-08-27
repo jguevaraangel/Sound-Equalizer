@@ -123,16 +123,27 @@ xlabel('Frecuencia [Hz]')
 ylabel('Amplitud [u.a.]')
 grid on
 
-% Verificamos que los vectores coincidan
+% Verificamos que coincida con el vector de amplitud
 isequal(modified, height')
+
+% Hagamos la reconstrucción
+rebuild = zeros(1,n);
+for j=1:12
+    temp = Fxs'.*windows(j,:);
+    rebuild = rebuild + temp;
+end
 
 %% Obteniendo la Transformada inversa de Fourier
 
-Fx2 = ifftshift(Fxs); % Devolviendo el corrimiento realizado con fftshift
-y = real(ifft(Fx2)); % Calculando la transformada inversa (Se toma la parte real, porque debido 
-                     % a errores numericos se obtiene una transformada compleja, pero los valores 
-                     % complejos son muy pequeños.
-y = y./max(y); % Se normaliza la señal de salida
+% Fx2 = ifftshift(Fxs); % Devolviendo el corrimiento realizado con fftshift
+% y = real(ifft(Fx2)); % Calculando la transformada inversa (Se toma la parte real, porque debido 
+%                      % a errores numericos se obtiene una transformada compleja, pero los valores 
+%                      % complejos son muy pequeños.
+% y = y./max(y); % Se normaliza la señal de salida
+
+Fx2 = ifftshift(rebuild);
+y = real(ifft(Fx2));
+y = y./max(y);
 
 % Graficando la señal en el tiempo
 figure,
