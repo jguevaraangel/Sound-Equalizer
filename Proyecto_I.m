@@ -69,53 +69,44 @@ grid on
 %% Bandas de frecuencias (12) y Ventanas
 
 % Ventanas rectangulares
-% Primer ventana (alrededor de 0)
-windows = zeros(12,n);
-windows(1, ((fs/2 - 20)*n/fs):((fs/2 + 0)*n/fs)) = 1;    
-windows(1, ((fs/2 - 0)*n/fs):((fs/2 + 20)*n/fs)) = 1;    
-
-% Resto de las ventanas
-width = 20;
-i = 20;
-counter = 2;
-while i ~= 20480
-    lower = (fs/2 - i - width)*n/fs;
-    upper = (fs/2 - i - 1)*n/fs;
-    windows(counter, lower:upper+1) = 1;  
-    
-    lower = (fs/2 + i + 1)*n/fs;
-    upper = (fs/2 + i + width)*n/fs;
-    windows(counter, lower-1:upper) = 1; 
-
-    counter = counter + 1;
-    i = i + width;
-    width = width*2;
-end
-
-% Ultima ventana
-upper = (fs/2 - i - 1)*n/fs;
-windows(12, 1:upper+1) = 1;
-lower = (fs/2 + i + 1)*n/fs;
-windows(12, lower-1:n) = 1;
+w = windows(n,fs);
 
 figure
 hold on
 for j=1:12   
-    plot(f,windows(j,:))
+    plot(f,w(j,:))
 end
 xlabel('Frecuencia [Hz]')
 ylabel('Amplitud [u.a.]')
+title('Ventanas rectangulares')
+grid on
+
+% Ventanas de Hanning
+h = hanning(n,fs);
+figure
+hold on
+for j=1:12   
+    plot(f,h(j,:))
+end
+xlabel('Frecuencia [Hz]')
+ylabel('Amplitud [u.a.]')
+title('Ventanas de Hanning')
 grid on
 
 %% Ecualizador  
 
-% Hagamos la reconstrucción
-rebuild = zeros(n,1);
+% Reconstrucción con ventanas rectangulares
+rec_build = zeros(n,1);
 for j=1:12
-    temp = Fxs.*windows(j,:)';
-    rebuild = rebuild + temp;
+    temp = Fxs.*w(j,:)';
+    rec_build = rec_build + temp;
 end
-isequal(rebuild, Fxs)
+
+han_build = zeros(n,1);
+for j=1:12
+    temp = Fxs.*h(j,:)';
+    han_build = han_build + temp;
+end
 
 %% Obteniendo la Transformada inversa de Fourier
 
@@ -125,15 +116,29 @@ isequal(rebuild, Fxs)
 %                      % complejos son muy pequeños.
 % y = y./max(y); % Se normaliza la señal de salida
 
-Fx2 = ifftshift(rebuild);
-y = real(ifft(Fx2));
-y = y./max(y);
+Fx2 = ifftshift(rec_build);
+y1 = real(ifft(Fx2));
+y1 = y1./max(y1);
+
+Fx3 = ifftshift(han_build);
+y2 = real(ifft(Fx3));
+y2 = y2./max(y2);
 
 % Graficando la señal en el tiempo
 figure,
-plot(t,y);
+plot(t,y1);
 grid on
 xlabel('tiempo [s]')
 ylabel('Amplitud [u.a.]')
-title('Señal de sonido recuperada')
-sound(y,fs) % escuchamos la reconstruccion
+title('Señal de sonido recuperada (Ventanas Rectangulares)')
+sound(y1,fs) % escuchamos la reconstruccion con ventanas rectangulares
+
+pause(4);
+
+figure,
+plot(t,y2);
+grid on
+xlabel('tiempo [s]')
+ylabel('Amplitud [u.a.]')
+title('Señal de sonido recuperada (Ventanas de Hanning)')
+sound(y2,fs) % escuchamos la reconstruccion con ventanas de hanning
