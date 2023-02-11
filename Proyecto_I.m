@@ -44,7 +44,10 @@ title('Señal de sonido grabada')
 % Escuchando la señal grabada
 sound(x,fs)
 
-%% Calculo de la transformada de Fourier de la señal
+%% 
+
+
+
 
 Fx = fft(x); % Algoritmo para calcular los valores de la Transformada de Fourier
 Fxs = fftshift(Fx); % Corrimiento de la transformada para obtener valores negativos y positivos. 
